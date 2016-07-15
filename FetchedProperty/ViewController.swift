@@ -18,6 +18,8 @@ class ViewController: UIViewController {
     //検証用データ（著者）
     let authorList = [["杉田真",false, 32]]
     
+    //著者オブジェクト
+    var author:Author!
     
     //最初からあるメソッド
     override func viewDidLoad() {
@@ -69,20 +71,20 @@ class ViewController: UIViewController {
     //著者表示メソッド
     func displayCustomer() {
         do {
-            //オブジェクトを取得する。。
+            //著者オブジェクトを取得する。。
             let fetchRequest = NSFetchRequest(entityName: "Author")
             let result = try managedContext.executeFetchRequest(fetchRequest) as! [Author]
+            author = result[0]
             
             //ラベルに著者情報を設定する。
-            for author in result {
-                nameLabel.text = author.name
-                if(author.sex == true) {
-                    sexLabel.text = "女性"
-                } else {
-                    sexLabel.text = "男性"
-                }
-                ageLabel.text = String(author.age!)
+            nameLabel.text = author.name
+            if(author.sex == true) {
+                sexLabel.text = "女性"
+            } else {
+                sexLabel.text = "男性"
             }
+            ageLabel.text = String(author.age!)
+            
         } catch {
             print(error)
         }
