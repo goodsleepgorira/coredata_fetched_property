@@ -11,10 +11,9 @@ class TestTableViewController: UITableViewController {
     var managedContext:NSManagedObjectContext!
 
     //検索結果配列
-    var searchResult = [Item]()
+    var searchResult = [Book]()
  
-       
-
+ 
     //最初からあるメソッド
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,16 +38,17 @@ class TestTableViewController: UITableViewController {
         searchResult.removeAll()
         
         //フェッチリクエストのインスタンスを生成する。
-        let fetchRequest = NSFetchRequest(entityName: "Item")
+        let fetchRequest = NSFetchRequest(entityName: "Book")
         
         do {
-            //フェッチリクエストを実行する。
-            searchResult = try managedContext.executeFetchRequest(fetchRequest) as! [Item]
+            //フェッチリクエストを実行して検索結果配列に設定する。
+            searchResult = try managedContext.executeFetchRequest(fetchRequest) as! [Book]
             
         } catch {
             print(error)
         }
     }
+    
     
 
     //データの個数を返すメソッド
@@ -57,14 +57,15 @@ class TestTableViewController: UITableViewController {
     }
 
 
+
     //データを返すメソッド
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         //セルを取得する。
         let cell = tableView.dequeueReusableCellWithIdentifier("TestCell", forIndexPath:indexPath) as UITableViewCell
         
-        //セルのラベルに商品情報を設定する。
-        let item = searchResult[indexPath.row]
-        cell.textLabel?.text = "\(item.name!)　\(item.price!)円"
+        //セルのラベルに書籍情報を設定する。
+        let book = searchResult[indexPath.row]
+        cell.textLabel?.text = "\(book.bookName!)　\(book.price!)円"
         
         return cell
     }
@@ -84,10 +85,10 @@ class TestTableViewController: UITableViewController {
         if editingStyle == UITableViewCellEditingStyle.Delete {
             do {
                 //選択行のオブジェクトを管理オブジェクトコンテキストから取得する。
-                let fetchRequest = NSFetchRequest(entityName: "Item")
-                fetchRequest.predicate = NSPredicate(format:"name = %@", searchResult[indexPath.row].name!)
+                let fetchRequest = NSFetchRequest(entityName: "Book")
+                fetchRequest.predicate = NSPredicate(format:"bookName = %@", searchResult[indexPath.row].bookName!)
                 
-                if let result = try managedContext.executeFetchRequest(fetchRequest) as? [Item] {
+                if let result = try managedContext.executeFetchRequest(fetchRequest) as? [Book] {
                     
                     //検索結果配列から選択行のオブジェクトを削除する。
                     searchResult.removeAtIndex(indexPath.row)
@@ -107,4 +108,33 @@ class TestTableViewController: UITableViewController {
         }
     }
 
+
+
+    //書籍追加ボタン押下時の呼び出しメソッド
+    @IBAction func pushAddButton(sender: UIBarButtonItem) {
+        do {
+            //保存されている書籍の数を数える。
+            let fetchRequest = NSFetchRequest(entityName: "Book")
+            fetchRequest.resultType = .CountResultType
+            let result = try managedContext.executeFetchRequest(fetchRequest) as! [Int]
+
+            //新しい書籍を管理オブジェクトコンテキストに追加する。
+            let book = NSEntityDescription.insertNewObjectForEntityForName("Book", inManagedObjectContext: managedContext) as! Book
+            book.author = "杉田真"
+            book.bookName = "テスト書籍名" + String(result[0])
+            book.price = Int(result[0]) * 100
+        
+            //管理オブジェクトコンテキストの中身を保存する。
+            try managedContext.save()
+            
+            //検索結果配列にデータを格納する。
+            makeSearchResult()
+            
+            //テーブルビューを再読み込みする。
+            self.tableView.reloadData()
+        
+        } catch {
+            print(error)
+        }
+    }
 }

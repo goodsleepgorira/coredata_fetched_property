@@ -9,19 +9,15 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var sexLabel: UILabel!
+    @IBOutlet weak var ageLabel: UILabel!
     @IBOutlet weak var itemTextView: UITextView!
     
     //管理オブジェクトコンテキスト
     var managedContext:NSManagedObjectContext!
     
-    //検証用データ（顧客）
-    let customerList = [["近藤",true, 1]]
+    //検証用データ（著者）
+    let authorList = [["杉田真",false, 32]]
     
-    //検証用データ（商品）
-    let itemList = [[1, "さらさら化粧水", 2500],
-                   [2, "しっとり化粧水", 1000],
-                   [3, "化粧水まろやか", 1300]]
-
     
     //最初からあるメソッド
     override func viewDidLoad() {
@@ -34,7 +30,7 @@ class ViewController: UIViewController {
         //検証用データを保存する。
         insertData()
         
-        //顧客情報を表示する。
+        //著者情報を表示する。
         displayCustomer()
         
     }
@@ -44,28 +40,19 @@ class ViewController: UIViewController {
     func insertData(){
         
         do {
-            //管理オブジェクトコンテキストの中のオブジェクトの件数を取得する。。
-            let fetchRequest = NSFetchRequest(entityName: "Customer")
+            //著者オブジェクトの件数を取得する。。
+            let fetchRequest = NSFetchRequest(entityName: "Author")
             fetchRequest.resultType = .CountResultType
             let result = try managedContext.executeFetchRequest(fetchRequest) as! [Int]
             
             if(result[0] == 0){
                 
-                //検証用の商品データを保存する。
-                for data in itemList {
-                    let item = NSEntityDescription.insertNewObjectForEntityForName("Item", inManagedObjectContext: managedContext) as! Item
-                    item.shubetsu = data[0] as? Int //商品種別
-                    item.name = data[1] as? String  //商品名
-                    item.price = data[2] as? Int    //価格
-                }
-
-
-                //検証用の顧客データを保存する。
-                for data in customerList {
-                    let customer = NSEntityDescription.insertNewObjectForEntityForName("Customer", inManagedObjectContext: managedContext) as! Customer
-                    customer.name = data[0] as? String //名前
-                    customer.sex = data[1] as? Bool    //性別
-                    customer.hope = data[2] as? Int    //年齢
+                //検証用の著者データを保存する。
+                for data in authorList {
+                    let author = NSEntityDescription.insertNewObjectForEntityForName("Author", inManagedObjectContext: managedContext) as! Author
+                    author.name = data[0] as? String  //著者名
+                    author.sex = data[1] as? Bool  //性別
+                    author.age = data[2] as? Int //年齢
                 }
                 
                 //管理オブジェクトコンテキストの中身を保存する。
@@ -79,21 +66,22 @@ class ViewController: UIViewController {
 
 
 
-    //顧客情報表示メソッド
+    //著者表示メソッド
     func displayCustomer() {
         do {
-            //顧客オブジェクトを取得する。。
-            let fetchRequest = NSFetchRequest(entityName: "Customer")
-            let result = try managedContext.executeFetchRequest(fetchRequest) as! [Customer]
+            //オブジェクトを取得する。。
+            let fetchRequest = NSFetchRequest(entityName: "Author")
+            let result = try managedContext.executeFetchRequest(fetchRequest) as! [Author]
             
-            //ラベルに顧客情報を設定する。
-            for data in result {
-                nameLabel.text = data.name
-                if(data.sex == true) {
+            //ラベルに著者情報を設定する。
+            for author in result {
+                nameLabel.text = author.name
+                if(author.sex == true) {
                     sexLabel.text = "女性"
                 } else {
                     sexLabel.text = "男性"
                 }
+                ageLabel.text = String(author.age!)
             }
         } catch {
             print(error)
@@ -101,7 +89,8 @@ class ViewController: UIViewController {
     }
 
 
-    //ボタン押下時の呼び出しメソッド
+
+    //出版物読込ボタン押下時の呼び出しメソッド
     @IBAction func pushButton(sender: UIButton) {
     }
 
